@@ -13,13 +13,13 @@ void Parser::NextToken() {
 
 void Parser::AssertToken(string d) {
 	if(this->token.value.compare(d) != 0) {
-		throw string("Unable to parse");
+		throw string("Unable to parse, expecting ") + d + string(" at line ") + to_string(this->token.line);
 	}
 }
 
 void Parser::AssertToken(TokenType type) {
 	if(this->token.type != type) {
-		throw string("Unable to parse");
+		throw string("Unable to parse, expecting type ") + to_string(type) + string(" at line ") + to_string(this->token.line);
 	}
 }
 

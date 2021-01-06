@@ -18,18 +18,23 @@ bool Tokenizer::IsSpace(char bit) {
 }
 
 vector<Token> Tokenizer::start() {
+
+	int line = 1;
+	int col  = 1;
+
 	vector<Token> tokens;
 	const char *p = this->data.c_str();
 	while(*p != '\0') {
 		if(this->IsKeyword(*p)) {
 			string keyword = "";
-			while(this->IsKeyword(*p)) {
+			while(this->IsKeyword(*p) || this->IsNumber(*p)) {
 				keyword.append(p, 1);
 				p++;
 			}
 			Token token;
 			token.type = TT_KEYWORD;
 			token.value = keyword;
+			token.line = line;
 			tokens.push_back(token);
 		} else if(this->IsNumber(*p)) {
 			string number = "";
@@ -40,6 +45,7 @@ vector<Token> Tokenizer::start() {
 			Token token;
 			token.type = TT_NUMBER;
 			token.value = number;
+			token.line = line;
 			tokens.push_back(token);
 		} else if(*p == '"') {
 			p++;
@@ -52,6 +58,7 @@ vector<Token> Tokenizer::start() {
 			Token token;
 			token.type = TT_STRING;
 			token.value = str;
+			token.line = line;
 			tokens.push_back(token);
 		} else if(*p == '\'') {
 			p++;
@@ -64,13 +71,18 @@ vector<Token> Tokenizer::start() {
 			Token token;
 			token.type = TT_CHAR;
 			token.value = str;
+			token.line = line;
 			tokens.push_back(token);
 		} else if(IsSpace(*p)) {
+			if(*p == '\n') {
+				line++;
+			}
 			p++;
 		} else {
 			Token token;
 			token.type = TT_TOKEN;
 			token.value = string(1, *p);
+			token.line = line;
 			tokens.push_back(token);
 			p++;
 		}

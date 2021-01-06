@@ -1,3 +1,5 @@
 function main() {
-	
+	uint32 x = 0;
+	uint32 y = 32;
+	uint32 z = x + y;
 }
