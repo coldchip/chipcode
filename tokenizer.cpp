@@ -75,6 +75,11 @@ vector<Token> Tokenizer::start() {
 			p++;
 		}
 	}
+
+	Token token;
+	token.type = TT_EOF;
+	tokens.push_back(token);
+
 	return tokens;
 }
 

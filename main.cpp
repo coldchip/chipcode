@@ -13,16 +13,21 @@ int main(int argc, char const *argv[]) {
 	std::ifstream t("code.txt");
 	std::string input((std::istreambuf_iterator<char>(t)),  std::istreambuf_iterator<char>());
 
-	Tokenizer tokenizer(input);
-	vector<Token> tokens = tokenizer.start();
+	try {
+		Tokenizer tokenizer(input);
+		vector<Token> tokens = tokenizer.start();
 
-	Parser parser(tokens);
-	parser.start();
+		for(Token token : tokens) {
+			cout << "Type: " << token.type << endl;
+			cout << "value: " << token.value << endl;
+			cout << "--------------------------------" << endl;
+		}
 
-	for(Token token : tokens) {
-		cout << "Type: " << token.type << endl;
-		cout << "value: " << token.value << endl;
-		cout << "--------------------------------" << endl;
+
+		Parser parser(tokens);
+		parser.start();
+	} catch(string &e) {
+		cout << "Error: " << e << endl;
 	}
 
 	return 0;
