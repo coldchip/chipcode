@@ -4,6 +4,7 @@
 #include <streambuf>
 #include "tokenizer.h"
 #include "parser.h"
+#include "codegen.h"
 
 using namespace std;
 
@@ -25,7 +26,13 @@ int main(int argc, char const *argv[]) {
 
 
 		Parser parser(tokens);
-		parser.start();
+		ASTNode *node = parser.start();
+
+		CodeGen codegen;
+		node->accept(&codegen);
+
+		//CodeGen codegen(node);
+		//codegen.start();
 	} catch(string &e) {
 		cout << "Error: " << e << endl;
 	}
