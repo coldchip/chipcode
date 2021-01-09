@@ -1,9 +1,11 @@
 #include "parser.h"
 
-Parser::Parser(vector<Token> tokens) {
+Parser::Parser(vector<Token>& tokens) {
 	this->tokens = tokens;
 	this->il = tokens.begin();
 	this->token = *this->il;
+
+	this->PushStack();
 }
 
 void Parser::ConsumeToken() {
@@ -49,26 +51,41 @@ bool Parser::PeekToken(TokenType type) {
 
 ASTNode *Parser::ParseStmt() {
 	ASTStmt *node = new ASTStmt;
-	if(this->ConsumeToken("while")) {
+	if(this->PeekToken("while")) {
+		this->ExpectToken("while");
 		this->ExpectToken("(");
 		this->ParseExpr();
 		this->ExpectToken(")");
 		this->ParseStmt();
-	} else if(this->ConsumeToken("{")) {
+	} else if(this->PeekToken("{")) {
+		this->PushStack();
+
+		this->ExpectToken("{");
 		while(!this->PeekToken("}")) {
 			this->ParseStmt();
 		}
 		this->ExpectToken("}");
-	} else {
-		this->ParseExpr();
+
+		this->PopStack();
+	} else if(this->PeekToken("var")) {
+		ASTNode *decl = this->ParseDecl();
 		this->ExpectToken(";");
+		return decl;
+	} else {
+		ASTNode *expr = this->ParseExpr();
+		this->ExpectToken(";");
+		return expr;
 	}
 	return node;
 }
 
 ASTNode *Parser::ParseFunction() {
 	ASTFunction *node = new ASTFunction;
+
+	this->PushStack();
+
 	this->ExpectToken("function");
+	node->name = this->token.value;
 	this->ExpectToken(TT_KEYWORD);
 	this->ExpectToken("(");
 	this->ExpectToken(")");
@@ -78,6 +95,22 @@ ASTNode *Parser::ParseFunction() {
 		node->stmt.push_back((ASTStmt*)this->ParseStmt());
 	}
 	this->ExpectToken("}");
+
+	this->PopStack();
+	return node;
+}
+
+ASTNode *Parser::ParseDecl() {
+	ASTDecl *node = new ASTDecl;
+	this->ExpectToken("var");
+	if(this->HasVar(this->token.value)) {
+		throw string("variable '" + this->token.value + "' already defined");
+	}
+	this->AddVar(this->token.value);
+	this->ExpectToken(TT_KEYWORD);
+	if(this->ConsumeToken("=")) {
+		node->body = this->ParseExpr();
+	}
 	return node;
 }
 

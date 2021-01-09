@@ -1,56 +1,89 @@
 #include "parser.h"
 
-void Parser::ParseExpr() {
-	this->ParseAssign();
+ASTNode *Parser::ParseExpr() {
+	return this->ParseAssign();
 }
 
-void Parser::ParseAssign() {
-	this->ParsePlus();
+ASTNode *Parser::ParseAssign() {
+	ASTNode *left = this->ParsePlus();
 	if(this->ConsumeToken("=")) {
-		this->ParseAssign();
+		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->left = left;
+		node->right = this->ParseAssign();
+		return node;
 	}
+	return left;
 }
 
-void Parser::ParsePlus() {
-	this->ParseMinus();
+ASTNode *Parser::ParsePlus() {
+	ASTNode *left = this->ParseMinus();
 	if(this->ConsumeToken("+")) {
-		this->ParsePlus();
+		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->left = left;
+		node->right = this->ParsePlus();
+		return node;
 	}
+	return left;
 }
 
-void Parser::ParseMinus() {
-	this->ParseMultiply();
+ASTNode *Parser::ParseMinus() {
+	ASTNode *left = this->ParseMultiply();
 	if(this->ConsumeToken("-")) {
-		this->ParseMinus();
+		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->left = left;
+		node->right = this->ParseMinus();
+		return node;
 	}
+	return left;
 }
 
-void Parser::ParseMultiply() {
-	this->ParseDivide();
+ASTNode *Parser::ParseMultiply() {
+	ASTNode *left = this->ParseDivide();
 	if(this->ConsumeToken("*")) {
-		this->ParseMultiply();
+		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->left = left;
+		node->right = this->ParseMultiply();
+		return node;
 	}
+	return left;
 }
 
-void Parser::ParseDivide() {
-	this->ParseEquality();
+ASTNode *Parser::ParseDivide() {
+	ASTNode *left = this->ParseEquality();
 	if(this->ConsumeToken("/")) {
-		this->ParseDivide();
+		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->left = left;
+		node->right = this->ParseDivide();
+		return node;
 	}
+	return left;
 }
 
-void Parser::ParseEquality() {
-	this->ParsePrimary();
+ASTNode *Parser::ParseEquality() {
+	ASTNode *left = this->ParsePrimary();
 	if(this->ConsumeToken("==")) {
-		this->ParseEquality();
+		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->left = left;
+		node->right = this->ParseEquality();
+		return node;
 	}
+	return left;
 }
 
-void Parser::ParsePrimary() {
+ASTNode *Parser::ParsePrimary() {
+	Token token = this->token;
 	if(this->ConsumeToken(TT_KEYWORD)) {
-
+		if(!this->HasVar(token.value)) {
+			throw string("variable '" + token.value + "' does not exist on the scope");
+		}
+		ASTIdentifier *node = new ASTIdentifier;
+		node->value = token.value;
+		return node;
 	} else if(this->ConsumeToken(TT_NUMBER)) {
-
+		ASTLiteral *node = new ASTLiteral;
+		cout << token.value << endl;
+		node->value = stoi(token.value);
+		return node;
 	} else {
 		throw string("Expecting TT_KEYWORD or TT_NUMBER");
 	}
