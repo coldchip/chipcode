@@ -73,7 +73,7 @@ ASTNode *Parser::ParseEquality() {
 ASTNode *Parser::ParsePrimary() {
 	Token token = this->token;
 	if(this->ConsumeToken(TT_KEYWORD)) {
-		if(!this->HasVar(token.value)) {
+		if(!this->scope->ContainsVar(token.value)) {
 			throw string("variable '" + token.value + "' does not exist on the scope");
 		}
 		ASTIdentifier *node = new ASTIdentifier;

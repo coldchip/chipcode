@@ -1,16 +1,19 @@
 #include "parser.h"
 
-Parser::Parser(vector<Token>& tokens) {
+Parser::Parser(vector<Token> tokens) {
+	this->scope = new Scope;
 	this->tokens = tokens;
-	this->il = tokens.begin();
-	this->token = *this->il;
+	this->ConsumeToken(); // Get first token ready
 
-	this->PushStack();
+	this->scope->PushScope(); // Push main frame
 }
 
 void Parser::ConsumeToken() {
-	this->il++;
-	this->token = *this->il;
+	try {
+		this->token = this->tokens.at(this->index++);
+	} catch(const std::out_of_range& e) {
+		throw string("unexpected end-of-file reached in parser");
+	}
 }
 
 bool Parser::ConsumeToken(string d) {
@@ -31,13 +34,21 @@ bool Parser::ConsumeToken(TokenType type) {
 
 void Parser::ExpectToken(string d) {
 	if(!this->ConsumeToken(d)) {
-		throw string("Unable to parse, expecting ") + d + string(" at line ") + to_string(this->token.line);
+		if(this->ConsumeToken(TT_EOF)) {
+			throw string("EOF reached, expecting ") + d + string(" at line ") + to_string(this->token.line);
+		} else {
+			throw string("Unable to parse, expecting ") + d + string(" at line ") + to_string(this->token.line);
+		}
 	}
 }
 
 void Parser::ExpectToken(TokenType type) {
 	if(!this->ConsumeToken(type)) {
-		throw string("Unable to parse, expecting type ") + to_string(type) + string(" at line ") + to_string(this->token.line);
+		if(this->ConsumeToken(TT_EOF)) {
+			throw string("EOF reached, expecting type ") + to_string(type) + string(" at line ") + to_string(this->token.line);
+		} else {
+			throw string("Unable to parse, expecting type ") + to_string(type) + string(" at line ") + to_string(this->token.line);
+		}
 	}
 }
 
@@ -58,15 +69,19 @@ ASTNode *Parser::ParseStmt() {
 		this->ExpectToken(")");
 		this->ParseStmt();
 	} else if(this->PeekToken("{")) {
-		this->PushStack();
+		ASTBlock *block = new ASTBlock;
+
+		this->scope->PushScope(); // Push frame
 
 		this->ExpectToken("{");
 		while(!this->PeekToken("}")) {
-			this->ParseStmt();
+			block->stmt.push_back((ASTNode*)this->ParseStmt());
 		}
 		this->ExpectToken("}");
 
-		this->PopStack();
+		this->scope->PopScope(); // pop frame
+
+		return block;
 	} else if(this->PeekToken("var")) {
 		ASTNode *decl = this->ParseDecl();
 		this->ExpectToken(";");
@@ -82,7 +97,7 @@ ASTNode *Parser::ParseStmt() {
 ASTNode *Parser::ParseFunction() {
 	ASTFunction *node = new ASTFunction;
 
-	this->PushStack();
+	this->scope->PushScope(); // Push frame
 
 	this->ExpectToken("function");
 	node->name = this->token.value;
@@ -92,21 +107,22 @@ ASTNode *Parser::ParseFunction() {
 	this->ExpectToken("{");
 	// Parse Body
 	while(!this->PeekToken("}")) {
-		node->stmt.push_back((ASTStmt*)this->ParseStmt());
+		node->stmt.push_back((ASTNode*)this->ParseStmt());
 	}
 	this->ExpectToken("}");
 
-	this->PopStack();
+	this->scope->PopScope(); // pop frame
 	return node;
 }
 
 ASTNode *Parser::ParseDecl() {
 	ASTDecl *node = new ASTDecl;
 	this->ExpectToken("var");
-	if(this->HasVar(this->token.value)) {
+	if(this->scope->ContainsVar(this->token.value)) {
 		throw string("variable '" + this->token.value + "' already defined");
 	}
-	this->AddVar(this->token.value);
+	this->scope->InsertVar(this->token.value);
+	node->name = this->token.value;
 	this->ExpectToken(TT_KEYWORD);
 	if(this->ConsumeToken("=")) {
 		node->body = this->ParseExpr();
@@ -119,5 +135,5 @@ ASTNode *Parser::start() {
 }
 
 Parser::~Parser() {
-
+	delete this->scope;
 }

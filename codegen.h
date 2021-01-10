@@ -11,6 +11,7 @@ class CodeGen : public ASTVisitor {
 		FILE *fp = NULL;
 
 		void visit(ASTFunction *e) override;
+		void visit(ASTBlock *e) override;
 		void visit(ASTStmt *e) override;
 		void visit(ASTDecl *e) override;
 		void visit(ASTExpr *e) override;

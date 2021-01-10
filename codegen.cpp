@@ -9,8 +9,19 @@ void CodeGen::visit(ASTFunction *e) {
 
 	fprintf(this->fp, "proc %s\n", e->name.c_str());
 
-	vector<ASTStmt*> stmt = e->stmt;
-	for(ASTStmt *each : stmt) {
+	vector<ASTNode*> stmt = e->stmt;
+	for(ASTNode *each : stmt) {
+		each->accept(this);
+	}
+
+	delete e;
+}
+
+void CodeGen::visit(ASTBlock *e) {
+	cout << "ASTBlock" << endl;
+
+	vector<ASTNode*> stmt = e->stmt;
+	for(ASTNode *each : stmt) {
 		each->accept(this);
 	}
 
@@ -19,16 +30,21 @@ void CodeGen::visit(ASTFunction *e) {
 
 void CodeGen::visit(ASTStmt *e) {
 	cout << "ASTStmt" << endl;
+	delete e;
 }
 
 void CodeGen::visit(ASTDecl *e) {
 	cout << "ASTDecl" << endl;
 	ASTNode *body = e->body;
 	body->accept(this);
+	fprintf(this->fp, "pop r0\n");
+	fprintf(this->fp, "setvar %s r0\n\n", e->name.c_str());
+	delete e;
 }
 
 void CodeGen::visit(ASTExpr *e) {
 	cout << "ASTExpr" << endl;
+	delete e;
 }
 
 void CodeGen::visit(ASTBinaryExpr *e) {
@@ -41,16 +57,19 @@ void CodeGen::visit(ASTBinaryExpr *e) {
 	fprintf(this->fp, "pop r1\n");
 	fprintf(this->fp, "add r0 r1\n");
 	fprintf(this->fp, "push r0\n\n");
+	delete e;
 }
 
 void CodeGen::visit(ASTLiteral *e) {
 	cout << "ASTLiteral " << to_string(e->value) << endl;
 	fprintf(this->fp, "push %s\n", to_string(e->value).c_str());
+	delete e;
 }
 
 void CodeGen::visit(ASTIdentifier *e) {
 	cout << "ASTIdentifier " << e->value << endl;
 	fprintf(this->fp, "push %s\n", e->value.c_str());
+	delete e;
 }
 
 CodeGen::~CodeGen() {

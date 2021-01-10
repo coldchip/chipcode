@@ -2,12 +2,14 @@
 #define PARSER_H
 
 #include "tokenizer.h"
+#include "scope.h"
 
 using namespace std;
 
 class ASTVisitor {
 	public:
 		virtual void visit(class ASTFunction *elem) = 0;
+		virtual void visit(class ASTBlock *elem) = 0;
 		virtual void visit(class ASTStmt *elem) = 0;
 		virtual void visit(class ASTDecl *elem) = 0;
 		virtual void visit(class ASTExpr *elem) = 0;
@@ -28,7 +30,15 @@ class ASTFunction : public ASTNode {
 			visitor->visit(this);
 		};
 		string name;
-		vector<ASTStmt*> stmt;
+		vector<ASTNode*> stmt;
+};
+
+class ASTBlock : public ASTNode {
+	public:
+		void accept(ASTVisitor *visitor) override {
+			visitor->visit(this);
+		};
+		vector<ASTNode*> stmt;
 };
 
 class ASTStmt : public ASTNode {
@@ -43,6 +53,7 @@ class ASTDecl : public ASTNode {
 		void accept(ASTVisitor *visitor) override {
 			visitor->visit(this);
 		};
+		string name;
 		ASTNode *body = NULL;
 };
 
@@ -78,29 +89,17 @@ class ASTIdentifier : public ASTNode {
 		string value;
 };
 
-
-
-typedef struct _Var {
-	string value;
-	long long address;
-} Var;
-
 class Parser {
 	public:
-		Parser(vector<Token>& tokens);
+		Parser(vector<Token> tokens);
 		ASTNode *start();
 		~Parser();
 	private:
 		vector<Token> tokens;
 		Token token;
-		vector<Token>::iterator il;
+		unsigned index = 0;
 
-		vector<vector<Var>> stack;
-
-		void PushStack();
-		void AddVar(string value);
-		bool HasVar(string value);
-		void PopStack();
+		Scope *scope;
 
 		void ConsumeToken();
 		bool ConsumeToken(string type);
