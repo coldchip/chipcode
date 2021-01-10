@@ -8,6 +8,7 @@ using namespace std;
 
 class ASTVisitor {
 	public:
+		virtual void visit(class ASTProgram *elem) = 0;
 		virtual void visit(class ASTFunction *elem) = 0;
 		virtual void visit(class ASTBlock *elem) = 0;
 		virtual void visit(class ASTStmt *elem) = 0;
@@ -16,12 +17,21 @@ class ASTVisitor {
 		virtual void visit(class ASTBinaryExpr *elem) = 0;
 		virtual void visit(class ASTLiteral *elem) = 0;
 		virtual void visit(class ASTIdentifier *elem) = 0;
+		virtual void visit(class ASTCall *elem) = 0;
 };
 
 class ASTNode {
 	public:
 		virtual ~ASTNode() {}
 		virtual void accept(ASTVisitor *visitor) = 0;
+};
+
+class ASTProgram : public ASTNode {
+	public:
+		void accept(ASTVisitor *visitor) override {
+			visitor->visit(this);
+		};
+		vector<ASTNode*> functions;
 };
 
 class ASTFunction : public ASTNode {
@@ -89,6 +99,14 @@ class ASTIdentifier : public ASTNode {
 		string value;
 };
 
+class ASTCall : public ASTNode {
+	public:
+		void accept(ASTVisitor *visitor) override {
+			visitor->visit(this);
+		};
+		string name;
+};
+
 class Parser {
 	public:
 		Parser(vector<Token> tokens);
@@ -97,10 +115,11 @@ class Parser {
 	private:
 		vector<Token> tokens;
 		Token token;
-		unsigned index = 0;
+		int index = -1; // Always starts at -1 because first token is always uninitialized
 
 		Scope *scope;
 
+		void UnconsumeToken();
 		void ConsumeToken();
 		bool ConsumeToken(string type);
 		bool ConsumeToken(TokenType type);
@@ -109,6 +128,9 @@ class Parser {
 		bool PeekToken(string d);
 		bool PeekToken(TokenType type);
 
+		bool IsCall();
+
+		ASTNode *ParseCall();
 		ASTNode *ParseStmt();
 		ASTNode *ParseFunction();
 		ASTNode *ParseDecl();

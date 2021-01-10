@@ -2,14 +2,19 @@
 #define CODEGEN_H
 
 #include "parser.h"
+#include "bytecode.h"
+
+using namespace std;
 
 class CodeGen : public ASTVisitor {
 	public:
 		CodeGen();
 		~CodeGen();
 	private:
+		ByteCode *bytecode;
 		FILE *fp = NULL;
 
+		void visit(ASTProgram *e) override;
 		void visit(ASTFunction *e) override;
 		void visit(ASTBlock *e) override;
 		void visit(ASTStmt *e) override;
@@ -18,6 +23,7 @@ class CodeGen : public ASTVisitor {
 		void visit(ASTBinaryExpr *e) override;
 		void visit(ASTLiteral *e) override;
 		void visit(ASTIdentifier *e) override;
+		void visit(ASTCall *e) override;
 };
 
 #endif

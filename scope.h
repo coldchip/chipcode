@@ -15,8 +15,7 @@ typedef struct _VarList {
 	vector<Var> list;
 } VarList;
 
-class Scope
-{
+class Scope {
 	public:
 		Scope();
 		void PushScope();

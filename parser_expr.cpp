@@ -72,7 +72,9 @@ ASTNode *Parser::ParseEquality() {
 
 ASTNode *Parser::ParsePrimary() {
 	Token token = this->token;
-	if(this->ConsumeToken(TT_KEYWORD)) {
+	if(this->IsCall()) {
+		return this->ParseCall();
+	} else if(this->ConsumeToken(TT_KEYWORD)) {
 		if(!this->scope->ContainsVar(token.value)) {
 			throw string("variable '" + token.value + "' does not exist on the scope");
 		}
@@ -81,7 +83,6 @@ ASTNode *Parser::ParsePrimary() {
 		return node;
 	} else if(this->ConsumeToken(TT_NUMBER)) {
 		ASTLiteral *node = new ASTLiteral;
-		cout << token.value << endl;
 		node->value = stoi(token.value);
 		return node;
 	} else {

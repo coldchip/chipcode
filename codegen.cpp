@@ -1,7 +1,19 @@
 #include "codegen.h"
 
 CodeGen::CodeGen() {
+	this->bytecode = new ByteCode;
 	this->fp = fopen("test/out.S", "wb");
+}
+
+void CodeGen::visit(ASTProgram *e) {
+	cout << "ASTProgram" << endl;
+
+	vector<ASTNode*> functions = e->functions;
+	for(ASTNode *each : functions) {
+		each->accept(this);
+	}
+
+	delete e;
 }
 
 void CodeGen::visit(ASTFunction *e) {
@@ -38,7 +50,7 @@ void CodeGen::visit(ASTDecl *e) {
 	ASTNode *body = e->body;
 	body->accept(this);
 	fprintf(this->fp, "pop r0\n");
-	fprintf(this->fp, "setvar %s r0\n\n", e->name.c_str());
+	fprintf(this->fp, "setvar %s r0\n", e->name.c_str());
 	delete e;
 }
 
@@ -56,7 +68,7 @@ void CodeGen::visit(ASTBinaryExpr *e) {
 	fprintf(this->fp, "pop r0\n");
 	fprintf(this->fp, "pop r1\n");
 	fprintf(this->fp, "add r0 r1\n");
-	fprintf(this->fp, "push r0\n\n");
+	fprintf(this->fp, "push r0\n");
 	delete e;
 }
 
@@ -72,6 +84,13 @@ void CodeGen::visit(ASTIdentifier *e) {
 	delete e;
 }
 
+void CodeGen::visit(ASTCall *e) {
+	cout << "ASTCall" << endl;
+	fprintf(this->fp, "call %s\n", e->name.c_str());
+	delete e;
+}
+
 CodeGen::~CodeGen() {
+	delete this->bytecode;
 	fclose(this->fp);
 }

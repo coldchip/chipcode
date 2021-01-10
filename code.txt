@@ -1,33 +1,22 @@
-function main() {
-	{
-		var a = 50;
-		var b = a + 50;
-		var c = a + b + 50;
-		var d = a + b + c + 50;
-		var e = a + b + c + d + 50;
-		var f = a + b + c + d + e + 50;
-		var g = a + b + c + d + e + f + 50;
-		var h = a + b + c + d + e + f + g + 50;
-		var i = a + b + c + d + e + f + g + h + 50;
-		var j = a + b + c + d + e + f + g + h + i + 50;
-		var k = a + b + c + d + e + f + g + h + i + j + 50;
-		var l = a + b + c + d + e + f + g + h + i + j + k + 50;
-	}
+function print() {
 
-	{
-		var a = 50;
-		var b = a + 50;
-		var c = a + b + 50;
-		var d = a + b + c + 50;
-		var e = a + b + c + d + 50;
-		var f = a + b + c + d + e + 50;
-		var g = a + b + c + d + e + f + 50;
-		var h = a + b + c + d + e + f + g + 50;
-		var i = a + b + c + d + e + f + g + h + 50;
-		var j = a + b + c + d + e + f + g + h + i + 50;
-		var k = a + b + c + d + e + f + g + h + i + j + 50;
-		var l = a + b + c + d + e + f + g + h + i + j + k + 50;
-	}
+}
+
+function main() {
+	var a = 50;
+	var b = a + 50;
+	var c = a + b + 50;
+	var d = a + b + c + 50;
+	var e = a + b + c + d + 50;
+	var f = a + b + c + d + e + 50;
+	var g = a + b + c + d + e + f + 50;
+	var h = a + b + c + d + e + f + g + 50;
+	var i = a + b + c + d + e + f + g + h + 50;
+	var j = a + b + c + d + e + f + g + h + i + 50;
+	var k = a + b + c + d + e + f + g + h + i + j + 50;
+	var l = a + b + c + d + e + f + g + h + i + j + k + 50;
+
+	print();
 
 	var z = 102400;
 }

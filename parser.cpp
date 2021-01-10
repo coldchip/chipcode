@@ -3,14 +3,21 @@
 Parser::Parser(vector<Token> tokens) {
 	this->scope = new Scope;
 	this->tokens = tokens;
-	this->ConsumeToken(); // Get first token ready
-
+	this->ConsumeToken();
 	this->scope->PushScope(); // Push main frame
+}
+
+void Parser::UnconsumeToken() {
+	try {
+		this->token = this->tokens.at(--this->index);
+	} catch(const std::out_of_range& e) {
+		throw string("unexpected end-of-file reached in parser");
+	}
 }
 
 void Parser::ConsumeToken() {
 	try {
-		this->token = this->tokens.at(this->index++);
+		this->token = this->tokens.at(++this->index);
 	} catch(const std::out_of_range& e) {
 		throw string("unexpected end-of-file reached in parser");
 	}
@@ -53,12 +60,37 @@ void Parser::ExpectToken(TokenType type) {
 }
 
 bool Parser::PeekToken(string d) {
-	return (this->token.value.compare(d) == 0);
+	return (this->token.value.compare(d) == 0) && !(this->index < 0);
 }
 
 bool Parser::PeekToken(TokenType type) {
-	return (this->token.type == type);
+	return (this->token.type == type) && !(this->index < 0);
 }
+
+bool Parser::IsCall() {
+	if(this->ConsumeToken(TT_KEYWORD)) {
+		if(this->ConsumeToken("(")) {
+			this->UnconsumeToken();
+			this->UnconsumeToken();
+			return true;
+		}
+		this->UnconsumeToken();
+	}
+	return false;
+}
+
+// Parse: myFunc(expr, expr, ...)
+
+ASTNode *Parser::ParseCall() {
+	ASTCall *node = new ASTCall;
+	node->name = this->token.value;
+	this->ExpectToken(TT_KEYWORD);
+	this->ExpectToken("(");
+	this->ExpectToken(")");
+	return node;
+}
+
+// (type x = expr)
 
 ASTNode *Parser::ParseStmt() {
 	ASTStmt *node = new ASTStmt;
@@ -94,6 +126,8 @@ ASTNode *Parser::ParseStmt() {
 	return node;
 }
 
+// function () { stmt }
+
 ASTNode *Parser::ParseFunction() {
 	ASTFunction *node = new ASTFunction;
 
@@ -115,6 +149,8 @@ ASTNode *Parser::ParseFunction() {
 	return node;
 }
 
+// (type x) or (type x = expr)
+
 ASTNode *Parser::ParseDecl() {
 	ASTDecl *node = new ASTDecl;
 	this->ExpectToken("var");
@@ -131,7 +167,11 @@ ASTNode *Parser::ParseDecl() {
 }
 
 ASTNode *Parser::start() {
-	return this->ParseFunction();
+	ASTProgram *node = new ASTProgram;
+	while(!this->PeekToken(TT_EOF)) {
+		node->functions.push_back(this->ParseFunction());
+	}
+	return node;
 }
 
 Parser::~Parser() {
