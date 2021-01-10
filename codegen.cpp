@@ -16,10 +16,35 @@ void CodeGen::visit(ASTProgram *e) {
 	delete e;
 }
 
+void CodeGen::visit(ASTParams *e) {
+	cout << "ASTParams" << endl;
+
+	vector<ASTNode*> params = e->params;
+	for(ASTNode *each : params) {
+		each->accept(this);
+	}
+
+	delete e;
+}
+
+void CodeGen::visit(ASTArgs *e) {
+	cout << "ASTArgs" << endl;
+
+	vector<ASTNode*> args = e->args;
+	for(ASTNode *each : args) {
+		each->accept(this);
+	}
+
+	delete e;
+}
+
 void CodeGen::visit(ASTFunction *e) {
 	cout << "ASTFunction" << endl;
 
 	fprintf(this->fp, "proc %s\n", e->name.c_str());
+
+	ASTNode* params = e->params;
+	params->accept(this);
 
 	vector<ASTNode*> stmt = e->stmt;
 	for(ASTNode *each : stmt) {
@@ -86,6 +111,10 @@ void CodeGen::visit(ASTIdentifier *e) {
 
 void CodeGen::visit(ASTCall *e) {
 	cout << "ASTCall" << endl;
+
+	ASTNode* args = e->args;
+	args->accept(this);
+	
 	fprintf(this->fp, "call %s\n", e->name.c_str());
 	delete e;
 }

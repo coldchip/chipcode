@@ -1,4 +1,6 @@
 proc print
+push aaa
+push bbb
 proc main
 push 50
 pop r0
@@ -366,6 +368,9 @@ add r0 r1
 push r0
 pop r0
 setvar l r0
+push a
+push b
+push c
 call print
 push 102400
 pop r0

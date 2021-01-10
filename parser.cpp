@@ -79,6 +79,25 @@ bool Parser::IsCall() {
 	return false;
 }
 
+bool Parser::IsTypeName() {
+	return 
+	this->PeekToken("void") || 
+	this->PeekToken("int32") || 
+	this->PeekToken("char");
+}
+
+// Parse: int64, string....
+
+ASTNode *Parser::ParseBaseType() {
+	//ASTNode *node = new ASTNode;
+	if(this->IsTypeName()) {
+		this->ExpectToken(TT_KEYWORD);
+	} else {
+		throw string("not a type");
+	}
+	return NULL;
+}
+
 // Parse: myFunc(expr, expr, ...)
 
 ASTNode *Parser::ParseCall() {
@@ -86,6 +105,7 @@ ASTNode *Parser::ParseCall() {
 	node->name = this->token.value;
 	this->ExpectToken(TT_KEYWORD);
 	this->ExpectToken("(");
+	node->args = this->ParseArguments();
 	this->ExpectToken(")");
 	return node;
 }
@@ -114,7 +134,7 @@ ASTNode *Parser::ParseStmt() {
 		this->scope->PopScope(); // pop frame
 
 		return block;
-	} else if(this->PeekToken("var")) {
+	} else if(this->IsTypeName()) {
 		ASTNode *decl = this->ParseDecl();
 		this->ExpectToken(";");
 		return decl;
@@ -133,10 +153,11 @@ ASTNode *Parser::ParseFunction() {
 
 	this->scope->PushScope(); // Push frame
 
-	this->ExpectToken("function");
+	this->ParseBaseType();
 	node->name = this->token.value;
 	this->ExpectToken(TT_KEYWORD);
 	this->ExpectToken("(");
+	node->params = this->ParseParameters();
 	this->ExpectToken(")");
 	this->ExpectToken("{");
 	// Parse Body
@@ -153,7 +174,7 @@ ASTNode *Parser::ParseFunction() {
 
 ASTNode *Parser::ParseDecl() {
 	ASTDecl *node = new ASTDecl;
-	this->ExpectToken("var");
+	this->ParseBaseType();
 	if(this->scope->ContainsVar(this->token.value)) {
 		throw string("variable '" + this->token.value + "' already defined");
 	}

@@ -9,6 +9,8 @@ using namespace std;
 class ASTVisitor {
 	public:
 		virtual void visit(class ASTProgram *elem) = 0;
+		virtual void visit(class ASTParams *elem) = 0;
+		virtual void visit(class ASTArgs *elem) = 0;
 		virtual void visit(class ASTFunction *elem) = 0;
 		virtual void visit(class ASTBlock *elem) = 0;
 		virtual void visit(class ASTStmt *elem) = 0;
@@ -34,12 +36,29 @@ class ASTProgram : public ASTNode {
 		vector<ASTNode*> functions;
 };
 
+class ASTParams : public ASTNode {
+	public:
+		void accept(ASTVisitor *visitor) override {
+			visitor->visit(this);
+		};
+		vector<ASTNode*> params;
+};
+
+class ASTArgs : public ASTNode {
+	public:
+		void accept(ASTVisitor *visitor) override {
+			visitor->visit(this);
+		};
+		vector<ASTNode*> args;
+};
+
 class ASTFunction : public ASTNode {
 	public:
 		void accept(ASTVisitor *visitor) override {
 			visitor->visit(this);
 		};
 		string name;
+		ASTNode *params;
 		vector<ASTNode*> stmt;
 };
 
@@ -104,6 +123,7 @@ class ASTCall : public ASTNode {
 		void accept(ASTVisitor *visitor) override {
 			visitor->visit(this);
 		};
+		ASTNode *args;
 		string name;
 };
 
@@ -127,13 +147,19 @@ class Parser {
 		void ExpectToken(TokenType type);
 		bool PeekToken(string d);
 		bool PeekToken(TokenType type);
-
 		bool IsCall();
+		bool IsTypeName();
 
+		ASTNode *ParseBaseType();
 		ASTNode *ParseCall();
 		ASTNode *ParseStmt();
 		ASTNode *ParseFunction();
 		ASTNode *ParseDecl();
+
+		ASTNode *ParseParameter();
+		ASTNode *ParseParameters();
+		ASTNode *ParseArgument();
+		ASTNode *ParseArguments();
 
 		ASTNode *ParseExpr();
 		ASTNode *ParseAssign();
