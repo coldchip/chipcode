@@ -41,7 +41,7 @@ void CodeGen::visit(ASTArgs *e) {
 void CodeGen::visit(ASTFunction *e) {
 	cout << "ASTFunction" << endl;
 
-	fprintf(this->fp, "proc %s\n", e->name.c_str());
+	this->bytecode->SetCurrentWorkingProcedure(e->name);
 
 	ASTNode* params = e->params;
 	params->accept(this);
@@ -74,6 +74,7 @@ void CodeGen::visit(ASTDecl *e) {
 	cout << "ASTDecl" << endl;
 	ASTNode *body = e->body;
 	body->accept(this);
+	//this->bytecode->Emit(OP_POP, "r0", "");
 	fprintf(this->fp, "pop r0\n");
 	fprintf(this->fp, "setvar %s r0\n", e->name.c_str());
 	delete e;
@@ -90,21 +91,28 @@ void CodeGen::visit(ASTBinaryExpr *e) {
 	right->accept(this);
 	left->accept(this);
 	cout << "ASTBinaryExpr" << endl;
+	this->bytecode->Emit(OP_POP, "r0", "");
+	this->bytecode->Emit(OP_POP, "r1", "");
+	this->bytecode->Emit(OP_ADD, "r0", "r1");
+	this->bytecode->Emit(OP_PUSH, "r0", "");
 	fprintf(this->fp, "pop r0\n");
 	fprintf(this->fp, "pop r1\n");
 	fprintf(this->fp, "add r0 r1\n");
 	fprintf(this->fp, "push r0\n");
+	fprintf(this->fp, "\n");
 	delete e;
 }
 
 void CodeGen::visit(ASTLiteral *e) {
 	cout << "ASTLiteral " << to_string(e->value) << endl;
+	this->bytecode->Emit(OP_PUSH, to_string(e->value).c_str(), "");
 	fprintf(this->fp, "push %s\n", to_string(e->value).c_str());
 	delete e;
 }
 
 void CodeGen::visit(ASTIdentifier *e) {
 	cout << "ASTIdentifier " << e->value << endl;
+	this->bytecode->Emit(OP_PUSH, "@" + to_string(e->offset), "");
 	fprintf(this->fp, "push %s\n", e->value.c_str());
 	delete e;
 }
@@ -115,11 +123,16 @@ void CodeGen::visit(ASTCall *e) {
 	ASTNode* args = e->args;
 	args->accept(this);
 	
+	this->bytecode->Emit(OP_CALL, e->name.c_str(), "");
 	fprintf(this->fp, "call %s\n", e->name.c_str());
 	delete e;
 }
 
 CodeGen::~CodeGen() {
+	this->bytecode->Dump();
+	VM vm(this->bytecode->Build());
+	vm.Run("main");
+
 	delete this->bytecode;
 	fclose(this->fp);
 }

@@ -83,6 +83,7 @@ class ASTDecl : public ASTNode {
 			visitor->visit(this);
 		};
 		string name;
+		int offset = 0;
 		ASTNode *body = NULL;
 };
 
@@ -116,6 +117,7 @@ class ASTIdentifier : public ASTNode {
 			visitor->visit(this);
 		};
 		string value;
+		int offset = 0;
 };
 
 class ASTCall : public ASTNode {

@@ -3,6 +3,7 @@
 
 #include "parser.h"
 #include "bytecode.h"
+#include "vm.h"
 
 using namespace std;
 

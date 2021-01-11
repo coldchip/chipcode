@@ -79,6 +79,7 @@ ASTNode *Parser::ParsePrimary() {
 			throw string("variable '" + token.value + "' does not exist on the scope");
 		}
 		ASTIdentifier *node = new ASTIdentifier;
+		node->offset = this->scope->GetVarOffset(token.value);
 		node->value = token.value;
 		return node;
 	} else if(this->ConsumeToken(TT_NUMBER)) {

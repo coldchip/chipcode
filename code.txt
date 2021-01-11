@@ -1,4 +1,4 @@
-void print(int32 aaa, int32 bbb) {
+void printf() {
 
 }
 
@@ -15,8 +15,7 @@ void main() {
 	int32 j = a + b + c + d + e + f + g + h + i + 50;
 	int32 k = a + b + c + d + e + f + g + h + i + j + 50;
 	int32 l = a + b + c + d + e + f + g + h + i + j + k + 50;
-
-	print(a, b, c);
-
-	int32 z = 102400;
+	printf();
+	dbgregs();
+	dbgstack();
 }
