@@ -3,19 +3,11 @@ void printf() {
 }
 
 void main() {
-	int32 a = 50;
-	int32 b = a + 50;
-	int32 c = a + b + 50;
-	int32 d = a + b + c + 50;
-	int32 e = a + b + c + d + 50;
-	int32 f = a + b + c + d + e + 50;
-	int32 g = a + b + c + d + e + f + 50;
-	int32 h = a + b + c + d + e + f + g + 50;
-	int32 i = a + b + c + d + e + f + g + h + 50;
-	int32 j = a + b + c + d + e + f + g + h + i + 50;
-	int32 k = a + b + c + d + e + f + g + h + i + j + 50;
-	int32 l = a + b + c + d + e + f + g + h + i + j + k + 50;
-	printf();
+	int32 a = 0;
+	int32 b = 1;
+	int32 c;
+	c = 4;
+	
 	dbgregs();
 	dbgstack();
 }

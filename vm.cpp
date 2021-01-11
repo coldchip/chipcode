@@ -40,7 +40,7 @@ void VM::ExecProcedure(Procedure &proc) {
 					int *a = (int*)(stack + where);
 					*(int*)(stack + sp) = *a;
 				} else {
-					stack[sp] = stoi(left);
+					*(int*)(stack + sp) = stoi(left);
 				}
 				sp += 4;
 			}
@@ -69,9 +69,40 @@ void VM::ExecProcedure(Procedure &proc) {
 				}
 			}
 			break;
+			case OP_SUB: {
+				if(this->IsReg(left) && this->IsReg(right)) {
+					int a = this->GetRegIndex(left);
+					int b = this->GetRegIndex(right);
+					reg[a] -= reg[b];
+				} else {
+					throw string("add only can be done to regs");
+				}
+			}
+			break;
+			case OP_MUL: {
+				if(this->IsReg(left) && this->IsReg(right)) {
+					int a = this->GetRegIndex(left);
+					int b = this->GetRegIndex(right);
+					reg[a] *= reg[b];
+				} else {
+					throw string("add only can be done to regs");
+				}
+			}
+			break;
+			case OP_DIV: {
+				if(this->IsReg(left) && this->IsReg(right)) {
+					int a = this->GetRegIndex(left);
+					int b = this->GetRegIndex(right);
+					reg[a] /= reg[b];
+				} else {
+					throw string("add only can be done to regs");
+				}
+			}
+			break;
 			case OP_CALL: {
 				if(left.compare("dbgregs") == 0) {
 					printf("----- DUMP REGISTERS -----\n");
+					printf("SP: %i\n", sp);
 					printf("R0: %i\n", reg[0]);
 					printf("R1: %i\n", reg[1]);
 					printf("R2: %i\n", reg[2]);
@@ -82,7 +113,7 @@ void VM::ExecProcedure(Procedure &proc) {
 					printf("----- DUMP STACK -----\n");
 					for(int i = 0; i < 256; i++) {
 						if(i % 4 == 0) {
-							printf("\n");
+							printf("\n%i: ", i);
 						}
 						printf("%02x", *(stack + i) & 0xFF);
 					}

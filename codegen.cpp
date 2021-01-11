@@ -5,6 +5,14 @@ CodeGen::CodeGen() {
 	this->fp = fopen("test/out.S", "wb");
 }
 
+CodeGen::GenerateLoad(ASTIdentifier *e) {
+
+}
+
+CodeGen::GenerateStore(ASTIdentifier *e) {
+
+}
+
 void CodeGen::visit(ASTProgram *e) {
 	cout << "ASTProgram" << endl;
 
@@ -73,10 +81,10 @@ void CodeGen::visit(ASTStmt *e) {
 void CodeGen::visit(ASTDecl *e) {
 	cout << "ASTDecl" << endl;
 	ASTNode *body = e->body;
-	body->accept(this);
+	if(body) {
+		body->accept(this);
+	}
 	//this->bytecode->Emit(OP_POP, "r0", "");
-	fprintf(this->fp, "pop r0\n");
-	fprintf(this->fp, "setvar %s r0\n", e->name.c_str());
 	delete e;
 }
 
@@ -85,21 +93,53 @@ void CodeGen::visit(ASTExpr *e) {
 	delete e;
 }
 
+void CodeGen::visit(ASTAssign *e) {
+	cout << "ASTAssign" << endl;
+	ASTNode *left = e->left;
+	ASTNode *right = e->right;
+	if(right) {
+		right->accept(this);
+	}
+	if(left) {
+		left->accept(this);
+	}
+}
+
 void CodeGen::visit(ASTBinaryExpr *e) {
 	ASTNode *left = e->left;
 	ASTNode *right = e->right;
-	right->accept(this);
-	left->accept(this);
+	if(right) {
+		right->accept(this);
+	}
+	if(left) {
+		left->accept(this);
+	}
 	cout << "ASTBinaryExpr" << endl;
 	this->bytecode->Emit(OP_POP, "r0", "");
 	this->bytecode->Emit(OP_POP, "r1", "");
-	this->bytecode->Emit(OP_ADD, "r0", "r1");
+	switch(e->oper) {
+		case OPER_ADD: {
+			this->bytecode->Emit(OP_ADD, "r0", "r1");
+		}
+		break;
+		case OPER_SUB: {
+			this->bytecode->Emit(OP_SUB, "r0", "r1");
+		}
+		break;
+		case OPER_MUL: {
+			this->bytecode->Emit(OP_MUL, "r0", "r1");
+		}
+		break;
+		case OPER_DIV: {
+			this->bytecode->Emit(OP_DIV, "r0", "r1");
+		}
+		break;
+		case OPER_ASSIGN: {
+			
+		}
+		break;
+	}
 	this->bytecode->Emit(OP_PUSH, "r0", "");
-	fprintf(this->fp, "pop r0\n");
-	fprintf(this->fp, "pop r1\n");
-	fprintf(this->fp, "add r0 r1\n");
-	fprintf(this->fp, "push r0\n");
-	fprintf(this->fp, "\n");
 	delete e;
 }
 

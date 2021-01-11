@@ -23,6 +23,7 @@ class CodeGen : public ASTVisitor {
 		void visit(ASTStmt *e) override;
 		void visit(ASTDecl *e) override;
 		void visit(ASTExpr *e) override;
+		void visit(ASTAssign *e) override;
 		void visit(ASTBinaryExpr *e) override;
 		void visit(ASTLiteral *e) override;
 		void visit(ASTIdentifier *e) override;

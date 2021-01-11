@@ -6,6 +6,14 @@
 
 using namespace std;
 
+typedef enum {
+	OPER_ADD,
+	OPER_SUB,
+	OPER_MUL,
+	OPER_DIV,
+	OPER_ASSIGN
+} Operator;
+
 class ASTVisitor {
 	public:
 		virtual void visit(class ASTProgram *elem) = 0;
@@ -16,6 +24,7 @@ class ASTVisitor {
 		virtual void visit(class ASTStmt *elem) = 0;
 		virtual void visit(class ASTDecl *elem) = 0;
 		virtual void visit(class ASTExpr *elem) = 0;
+		virtual void visit(class ASTAssign *elem) = 0;
 		virtual void visit(class ASTBinaryExpr *elem) = 0;
 		virtual void visit(class ASTLiteral *elem) = 0;
 		virtual void visit(class ASTIdentifier *elem) = 0;
@@ -94,11 +103,21 @@ class ASTExpr : public ASTNode {
 		};
 };
 
+class ASTAssign : public ASTNode {
+	public:
+		void accept(ASTVisitor *visitor) override {
+			visitor->visit(this);
+		};
+		ASTNode *left = NULL;
+		ASTNode	*right = NULL;
+};
+
 class ASTBinaryExpr : public ASTNode {
 	public:
 		void accept(ASTVisitor *visitor) override {
 			visitor->visit(this);
 		};
+		Operator oper;
 		ASTNode *left = NULL;
 		ASTNode	*right = NULL;
 };

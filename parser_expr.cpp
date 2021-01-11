@@ -7,7 +7,7 @@ ASTNode *Parser::ParseExpr() {
 ASTNode *Parser::ParseAssign() {
 	ASTNode *left = this->ParsePlus();
 	if(this->ConsumeToken("=")) {
-		ASTBinaryExpr *node = new ASTBinaryExpr;
+		ASTAssign *node = new ASTAssign; // Assign Node
 		node->left = left;
 		node->right = this->ParseAssign();
 		return node;
@@ -19,6 +19,7 @@ ASTNode *Parser::ParsePlus() {
 	ASTNode *left = this->ParseMinus();
 	if(this->ConsumeToken("+")) {
 		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->oper = OPER_ADD;
 		node->left = left;
 		node->right = this->ParsePlus();
 		return node;
@@ -30,6 +31,7 @@ ASTNode *Parser::ParseMinus() {
 	ASTNode *left = this->ParseMultiply();
 	if(this->ConsumeToken("-")) {
 		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->oper = OPER_SUB;
 		node->left = left;
 		node->right = this->ParseMinus();
 		return node;
@@ -41,6 +43,7 @@ ASTNode *Parser::ParseMultiply() {
 	ASTNode *left = this->ParseDivide();
 	if(this->ConsumeToken("*")) {
 		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->oper = OPER_MUL;
 		node->left = left;
 		node->right = this->ParseMultiply();
 		return node;
@@ -52,6 +55,7 @@ ASTNode *Parser::ParseDivide() {
 	ASTNode *left = this->ParseEquality();
 	if(this->ConsumeToken("/")) {
 		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->oper = OPER_DIV;
 		node->left = left;
 		node->right = this->ParseDivide();
 		return node;
