@@ -1,6 +1,7 @@
 #include "codegen.h"
 
 CodeGen::CodeGen() {
+	srand((unsigned)time(NULL));
 	this->bytecode = new ByteCode;
 	this->fp = fopen("test/out.S", "wb");
 }
@@ -76,11 +77,11 @@ void CodeGen::visit(ASTWhile *e) {
 	if(body) {
 		string prev_label = this->bytecode->GetCurrentWorkingProcedure();
 		string label = this->RandomLabel(6);
-		this->bytecode->Emit(OP_CALL, label, "");
+		this->bytecode->Emit(OP_JMP, label, "");
 		this->bytecode->SetCurrentWorkingProcedure(label);
 		body->accept(this);
 
-		this->bytecode->Emit(OP_PUSH, "100000", "");
+		this->bytecode->Emit(OP_PUSH, "1147480000", "");
 		this->bytecode->Emit(OP_POP, "r3", "");
 		this->bytecode->Emit(OP_CMP, "r0", "r3");
 
@@ -201,7 +202,6 @@ string CodeGen::RandomLabel(const int len) {
     string tmp_s;
     static const char alphanum[] =
         "0123456789abcdefghijklmnopqrstuvwxyz";
-    srand((unsigned)time(NULL));
     tmp_s.reserve(len);
     for (int i = 0; i < len; ++i) {
         tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];

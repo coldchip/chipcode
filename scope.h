@@ -1,7 +1,6 @@
 #ifndef SCOPE_H
 #define SCOPE_H
 
-#include <stack>
 #include <vector>
 #include <string>
 
@@ -28,7 +27,7 @@ class Scope {
 		void PopScope();
 		~Scope();
 	private:
-		stack<VarList> scope;
+		vector<VarList> scope;
 };
 
 #endif

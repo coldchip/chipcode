@@ -6,17 +6,17 @@ Scope::Scope() {
 
 void Scope::PushScope() {
 	VarList list;
-	this->scope.push(list);
+	this->scope.push_back(list);
 }
 
 int Scope::GetOffset() {
-	return this->scope.top().offset;
+	return this->scope.back().offset;
 }
 
 void Scope::InsertVar(string value) {
 	Var var;
 	var.value = value;
-	VarList &current = this->scope.top();
+	VarList &current = this->scope.back();
 	var.offset = current.offset;
 	current.offset += 4;
 	current.list.push_back(var);
@@ -25,11 +25,12 @@ void Scope::InsertVar(string value) {
 bool Scope::ContainsVar(string value) {
 	Var var;
 	var.value = value;
-	VarList &current = this->scope.top();
-	for(Var &var : current.list) {
-		if(var.value.compare(value) == 0) {
-			return true;
-		} 
+	for(VarList &current : this->scope) {
+		for(Var &var : current.list) {
+			if(var.value.compare(value) == 0) {
+				return true;
+			} 
+		}
 	}
 	return false;
 }
@@ -37,17 +38,18 @@ bool Scope::ContainsVar(string value) {
 int Scope::GetVarOffset(string value) {
 	Var var;
 	var.value = value;
-	VarList &current = this->scope.top();
-	for(Var &var : current.list) {
-		if(var.value.compare(value) == 0) {
-			return var.offset;
-		} 
+	for(VarList &current : this->scope) {
+		for(Var &var : current.list) {
+			if(var.value.compare(value) == 0) {
+				return var.offset;
+			} 
+		}
 	}
 	throw string(value + " not found in scope");
 }
 
 void Scope::PopScope() {
-	this->scope.pop();
+	this->scope.pop_back();
 }
 
 Scope::~Scope() {
