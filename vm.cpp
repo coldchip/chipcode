@@ -22,9 +22,14 @@ void VM::Run(string name) {
 void VM::ExecProcedure(Procedure &proc) {
 	int reg[7];
 	char stack[65535];
+	bool cmp_flag = false;
+	bool cmplt_flag = false;
+	bool cmpgt_flag = false;
 	int sp = 0;
 	memset(stack, 0 , sizeof(stack));
 	memset(reg, 0 , sizeof(reg));
+
+	jmp:
 
 	for(Instruction &ins : proc.instructions) {
 		OPCode op = ins.op;
@@ -99,6 +104,22 @@ void VM::ExecProcedure(Procedure &proc) {
 				}
 			}
 			break;
+			case OP_MOV: {
+				if(this->IsAddress(left)) {
+					int a = 0;
+					if(this->IsReg(right)) {
+						int i = this->GetRegIndex(right);
+						a = reg[i];
+					}
+					if(this->IsAddress(right)) {
+						int where = this->GetAddressIndex(right);
+						a = *(int*)(stack + where);
+					}
+					int to = this->GetAddressIndex(left);
+					*(int*)(stack + to) = a;
+				}
+			}
+			break;
 			case OP_CALL: {
 				if(left.compare("dbgregs") == 0) {
 					printf("----- DUMP REGISTERS -----\n");
@@ -118,6 +139,67 @@ void VM::ExecProcedure(Procedure &proc) {
 						printf("%02x", *(stack + i) & 0xFF);
 					}
 					printf("\n");
+				} else {
+					Procedure &sub = this->GetProcedure(left);
+					this->ExecProcedure(sub);
+				}
+			}
+			break;
+			case OP_CMP: {
+				if(this->IsReg(left) && this->IsReg(right)) {
+					int ia = this->GetRegIndex(left);
+					int a = reg[ia];
+					int ib = this->GetRegIndex(right);
+					int b = reg[ib];
+					
+					cmp_flag = false;
+					cmplt_flag = false;
+					cmpgt_flag = false;
+					if(a == b) {
+						cmp_flag = true;
+					} else if(a < b) {
+						cmplt_flag = true;
+					} else if(a > b) {
+						cmpgt_flag = true;
+					}
+				}
+			}
+			break;
+			case OP_JMP: {
+				// unconditional jump
+				proc = this->GetProcedure(left);
+				goto jmp; // very dirty way to do this
+			}
+			break;
+			case OP_JE: {
+				// jump if equals
+				if(cmp_flag == true) {
+					proc = this->GetProcedure(left);
+					goto jmp; // very dirty way to do this
+				}
+			}
+			break;
+			case OP_JNE: {
+				// jump if not equals
+				if(cmp_flag == false) {
+					proc = this->GetProcedure(left);
+					goto jmp; // very dirty way to do this
+				}
+			}
+			break;
+			case OP_JLZ: {
+				// jump if less than
+				if(cmplt_flag == true) {
+					proc = this->GetProcedure(left);
+					goto jmp; // very dirty way to do this
+				}
+			}
+			break;
+			case OP_JGZ: {
+				// jump if greater than
+				if(cmpgt_flag == true) {
+					proc = this->GetProcedure(left);
+					goto jmp; // very dirty way to do this
 				}
 			}
 			break;

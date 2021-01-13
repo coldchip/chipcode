@@ -15,7 +15,13 @@ typedef enum {
 	OP_MUL,
 	OP_DIV,
 	OP_CALL,
-	OP_MOV
+	OP_MOV,
+	OP_CMP,
+	OP_JMP,
+	OP_JE,
+	OP_JNE,
+	OP_JLZ,
+	OP_JGZ
 } OPCode;
 
 typedef struct _Instruction {
@@ -33,7 +39,9 @@ class ByteCode {
 	public:
 		ByteCode();
 		void SetCurrentWorkingProcedure(string name);
+		string GetCurrentWorkingProcedure();
 		void Emit(OPCode op, string left, string right);
+		string GetInstructionAsString(OPCode op);
 		void Dump();
 		vector<Procedure> Build();
 		~ByteCode();

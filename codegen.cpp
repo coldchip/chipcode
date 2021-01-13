@@ -5,13 +5,19 @@ CodeGen::CodeGen() {
 	this->fp = fopen("test/out.S", "wb");
 }
 
-CodeGen::GenerateLoad(ASTIdentifier *e) {
+/*
+void CodeGen::GenerateLoad(ASTIdentifier *e) {
 
 }
 
-CodeGen::GenerateStore(ASTIdentifier *e) {
+*/
 
+void CodeGen::GenerateStore(ASTIdentifier *e) {
+	// Generates instructions to store reg r0 to identifier
+	cout << "GenStore" << endl;
+	this->bytecode->Emit(OP_MOV, "@" + to_string(e->offset), "r0");
 }
+
 
 void CodeGen::visit(ASTProgram *e) {
 	cout << "ASTProgram" << endl;
@@ -62,6 +68,29 @@ void CodeGen::visit(ASTFunction *e) {
 	delete e;
 }
 
+void CodeGen::visit(ASTWhile *e) {
+	cout << "ASTWhile" << endl;
+
+	ASTNode *body = e->body;
+
+	if(body) {
+		string prev_label = this->bytecode->GetCurrentWorkingProcedure();
+		string label = this->RandomLabel(6);
+		this->bytecode->Emit(OP_CALL, label, "");
+		this->bytecode->SetCurrentWorkingProcedure(label);
+		body->accept(this);
+
+		this->bytecode->Emit(OP_PUSH, "100000", "");
+		this->bytecode->Emit(OP_POP, "r3", "");
+		this->bytecode->Emit(OP_CMP, "r0", "r3");
+
+		this->bytecode->Emit(OP_JLZ, label, "");
+		this->bytecode->SetCurrentWorkingProcedure(prev_label);
+	}
+
+	delete e;
+}
+
 void CodeGen::visit(ASTBlock *e) {
 	cout << "ASTBlock" << endl;
 
@@ -99,9 +128,11 @@ void CodeGen::visit(ASTAssign *e) {
 	ASTNode *right = e->right;
 	if(right) {
 		right->accept(this);
+		this->bytecode->Emit(OP_POP, "r0", "");
 	}
 	if(left) {
-		left->accept(this);
+		// left->accept(this);
+		this->GenerateStore((ASTIdentifier*)left);
 	}
 }
 
@@ -146,14 +177,12 @@ void CodeGen::visit(ASTBinaryExpr *e) {
 void CodeGen::visit(ASTLiteral *e) {
 	cout << "ASTLiteral " << to_string(e->value) << endl;
 	this->bytecode->Emit(OP_PUSH, to_string(e->value).c_str(), "");
-	fprintf(this->fp, "push %s\n", to_string(e->value).c_str());
 	delete e;
 }
 
 void CodeGen::visit(ASTIdentifier *e) {
 	cout << "ASTIdentifier " << e->value << endl;
 	this->bytecode->Emit(OP_PUSH, "@" + to_string(e->offset), "");
-	fprintf(this->fp, "push %s\n", e->value.c_str());
 	delete e;
 }
 
@@ -166,6 +195,18 @@ void CodeGen::visit(ASTCall *e) {
 	this->bytecode->Emit(OP_CALL, e->name.c_str(), "");
 	fprintf(this->fp, "call %s\n", e->name.c_str());
 	delete e;
+}
+
+string CodeGen::RandomLabel(const int len) {
+    string tmp_s;
+    static const char alphanum[] =
+        "0123456789abcdefghijklmnopqrstuvwxyz";
+    srand((unsigned)time(NULL));
+    tmp_s.reserve(len);
+    for (int i = 0; i < len; ++i) {
+        tmp_s += alphanum[rand() % (sizeof(alphanum) - 1)];
+    }
+    return "sub_" + tmp_s;
 }
 
 CodeGen::~CodeGen() {

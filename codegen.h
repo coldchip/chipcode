@@ -15,10 +15,13 @@ class CodeGen : public ASTVisitor {
 		ByteCode *bytecode;
 		FILE *fp = NULL;
 
+		void GenerateStore(ASTIdentifier *e);
+
 		void visit(ASTProgram *e) override;
 		void visit(ASTParams *e) override;
 		void visit(ASTArgs *e) override;
 		void visit(ASTFunction *e) override;
+		void visit(ASTWhile *e) override;
 		void visit(ASTBlock *e) override;
 		void visit(ASTStmt *e) override;
 		void visit(ASTDecl *e) override;
@@ -28,6 +31,8 @@ class CodeGen : public ASTVisitor {
 		void visit(ASTLiteral *e) override;
 		void visit(ASTIdentifier *e) override;
 		void visit(ASTCall *e) override;
+
+		static string RandomLabel(const int len);
 };
 
 #endif

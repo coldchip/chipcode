@@ -20,6 +20,7 @@ class ASTVisitor {
 		virtual void visit(class ASTParams *elem) = 0;
 		virtual void visit(class ASTArgs *elem) = 0;
 		virtual void visit(class ASTFunction *elem) = 0;
+		virtual void visit(class ASTWhile *elem) = 0;
 		virtual void visit(class ASTBlock *elem) = 0;
 		virtual void visit(class ASTStmt *elem) = 0;
 		virtual void visit(class ASTDecl *elem) = 0;
@@ -69,6 +70,14 @@ class ASTFunction : public ASTNode {
 		string name;
 		ASTNode *params;
 		vector<ASTNode*> stmt;
+};
+
+class ASTWhile : public ASTNode {
+	public:
+		void accept(ASTVisitor *visitor) override {
+			visitor->visit(this);
+		};
+		ASTNode *body;
 };
 
 class ASTBlock : public ASTNode {
