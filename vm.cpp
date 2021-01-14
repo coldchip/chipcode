@@ -16,18 +16,20 @@ Procedure &VM::GetProcedure(string name) {
 
 void VM::Run(string name) {
 	Procedure &proc = this->GetProcedure(name);
-	this->ExecProcedure(proc);
+	char stack[65535];
+	memset(stack, 0 , sizeof(stack));
+
+	int reg[7];
+	memset(reg, 0 , sizeof(reg));
+
+	int sp = 0;
+	this->ExecProcedure(proc, (char*)&stack, (int*)&reg, sp);
 }
 
-void VM::ExecProcedure(Procedure &proc) {
-	int reg[7];
-	char stack[65535];
+void VM::ExecProcedure(Procedure &proc, char *stack, int *reg, int sp) {
 	bool cmp_flag = false;
 	bool cmplt_flag = false;
 	bool cmpgt_flag = false;
-	int sp = 0;
-	memset(stack, 0 , sizeof(stack));
-	memset(reg, 0 , sizeof(reg));
 
 	jmp:
 
@@ -39,7 +41,7 @@ void VM::ExecProcedure(Procedure &proc) {
 			case OP_PUSH: {
 				if(this->IsReg(left)) {
 					int i = this->GetRegIndex(left);
-					*(int*)(stack + sp) = reg[i];
+					*(int*)(stack + sp) = *(reg + i);
 				} else if(this->IsAddress(left)) {
 					int where = this->GetAddressIndex(left);
 					int *a = (int*)(stack + where);
@@ -54,7 +56,7 @@ void VM::ExecProcedure(Procedure &proc) {
 				sp -= 4;
 				if(this->IsReg(left)) {
 					int i = this->GetRegIndex(left);
-					reg[i] = *(int*)(stack + sp);
+					*(reg + i) = *(int*)(stack + sp);
 				} else if(this->IsAddress(left)) {
 					int where = this->GetAddressIndex(left);
 					int *a = (int*)(stack + where);
@@ -68,7 +70,7 @@ void VM::ExecProcedure(Procedure &proc) {
 				if(this->IsReg(left) && this->IsReg(right)) {
 					int a = this->GetRegIndex(left);
 					int b = this->GetRegIndex(right);
-					reg[a] += reg[b];
+					*(reg + a) += *(reg + b);
 				} else {
 					throw string("add only can be done to regs");
 				}
@@ -78,7 +80,7 @@ void VM::ExecProcedure(Procedure &proc) {
 				if(this->IsReg(left) && this->IsReg(right)) {
 					int a = this->GetRegIndex(left);
 					int b = this->GetRegIndex(right);
-					reg[a] -= reg[b];
+					*(reg + a) -= *(reg + b);
 				} else {
 					throw string("add only can be done to regs");
 				}
@@ -88,7 +90,7 @@ void VM::ExecProcedure(Procedure &proc) {
 				if(this->IsReg(left) && this->IsReg(right)) {
 					int a = this->GetRegIndex(left);
 					int b = this->GetRegIndex(right);
-					reg[a] *= reg[b];
+					*(reg + a) *= *(reg + b);
 				} else {
 					throw string("add only can be done to regs");
 				}
@@ -98,25 +100,30 @@ void VM::ExecProcedure(Procedure &proc) {
 				if(this->IsReg(left) && this->IsReg(right)) {
 					int a = this->GetRegIndex(left);
 					int b = this->GetRegIndex(right);
-					reg[a] /= reg[b];
+					*(reg + a) /= *(reg + b);
 				} else {
 					throw string("add only can be done to regs");
 				}
 			}
 			break;
 			case OP_MOV: {
-				if(this->IsAddress(left)) {
+				if(this->IsAddress(left) || this->IsReg(left)) {
 					int a = 0;
 					if(this->IsReg(right)) {
 						int i = this->GetRegIndex(right);
-						a = reg[i];
+						a = *(reg + i);
 					}
 					if(this->IsAddress(right)) {
 						int where = this->GetAddressIndex(right);
 						a = *(int*)(stack + where);
 					}
-					int to = this->GetAddressIndex(left);
-					*(int*)(stack + to) = a;
+					if(this->IsReg(left)) {
+						int i = this->GetRegIndex(left);
+						*(reg + i) = a;
+					} else {
+						int to = this->GetAddressIndex(left);
+						*(int*)(stack + to) = a;
+					}
 				}
 			}
 			break;
@@ -141,17 +148,17 @@ void VM::ExecProcedure(Procedure &proc) {
 					printf("\n");
 				} else {
 					Procedure &sub = this->GetProcedure(left);
-					this->ExecProcedure(sub);
+					this->ExecProcedure(sub, stack, reg, sp);
 				}
 			}
 			break;
 			case OP_CMP: {
 				if(this->IsReg(left) && this->IsReg(right)) {
 					int ia = this->GetRegIndex(left);
-					int a = reg[ia];
+					int a = *(reg + ia);
 					int ib = this->GetRegIndex(right);
-					int b = reg[ib];
-					
+					int b = *(reg + ib);
+
 					cmp_flag = false;
 					cmplt_flag = false;
 					cmpgt_flag = false;
@@ -200,6 +207,26 @@ void VM::ExecProcedure(Procedure &proc) {
 				if(cmpgt_flag == true) {
 					proc = this->GetProcedure(left);
 					goto jmp; // very dirty way to do this
+				}
+			}
+			break;
+			case OP_SETGT: {
+				// set gt
+				if(cmpgt_flag == true) {
+					if(this->IsReg(left)) {
+						int i = this->GetRegIndex(left);
+						*(reg + i) = 1;
+					}
+				}
+			}
+			break;
+			case OP_SETLT: {
+				// set lt
+				if(cmplt_flag == true) {
+					if(this->IsReg(left)) {
+						int i = this->GetRegIndex(left);
+						*(reg + i) = 1;
+					}
 				}
 			}
 			break;

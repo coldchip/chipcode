@@ -8,20 +8,23 @@
 using namespace std;
 
 typedef enum {
-	OP_POP,
-	OP_PUSH,
-	OP_ADD,
-	OP_SUB,
-	OP_MUL,
-	OP_DIV,
-	OP_CALL,
-	OP_MOV,
-	OP_CMP,
-	OP_JMP,
-	OP_JE,
-	OP_JNE,
-	OP_JLZ,
-	OP_JGZ
+	OP_POP, // pop from stack
+	OP_PUSH, // push to stack
+	OP_ADD, // add among regs
+	OP_SUB, // sub among regs
+	OP_MUL, // mul among regs
+	OP_DIV, // div among regs
+	OP_CALL, // call procedure
+	OP_MOV, // move data to address
+	OP_CMP, // compare among regs
+	OP_JMP, // jump to procedure
+	OP_JE, // jump to procedure if equals
+	OP_JNE, // jump to procedure if NOT equals
+	OP_JLZ, // jump to procedure if lesser than
+	OP_JGZ, // jump to procedure if more than
+	OP_SETGT, // set register to 1 if last comparision result is more than
+	OP_SETLT,  // set register to 1 if last comparision result is less than
+	OP_NOP  // do nothing
 } OPCode;
 
 typedef struct _Instruction {
@@ -41,7 +44,7 @@ class ByteCode {
 		void SetCurrentWorkingProcedure(string name);
 		string GetCurrentWorkingProcedure();
 		void Emit(OPCode op, string left, string right);
-		string GetInstructionAsString(OPCode op);
+		static string GetInstructionAsString(OPCode op);
 		void Dump();
 		vector<Procedure> Build();
 		~ByteCode();

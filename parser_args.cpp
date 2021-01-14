@@ -3,7 +3,12 @@
 ASTNode *Parser::ParseParameter() {
 	ASTIdentifier *ident = new ASTIdentifier;
 	this->ParseBaseType();
+	if(this->scope->ContainsVar(this->token.value)) {
+		throw string("variable '" + this->token.value + "' already defined");
+	}
+	this->scope->InsertVar(this->token.value);
 	ident->value = this->token.value;
+	ident->offset = this->scope->GetVarOffset(this->token.value);
 	this->ExpectToken(TT_KEYWORD);
 	return ident;
 }

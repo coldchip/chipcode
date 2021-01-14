@@ -6,6 +6,9 @@ Scope::Scope() {
 
 void Scope::PushScope() {
 	VarList list;
+	if(!this->scope.empty()) {
+		list.offset = this->scope.back().offset;
+	}
 	this->scope.push_back(list);
 }
 

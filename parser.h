@@ -11,7 +11,9 @@ typedef enum {
 	OPER_SUB,
 	OPER_MUL,
 	OPER_DIV,
-	OPER_ASSIGN
+	OPER_ASSIGN,
+	OPER_LT,
+	OPER_GT
 } Operator;
 
 class ASTVisitor {
@@ -21,6 +23,7 @@ class ASTVisitor {
 		virtual void visit(class ASTArgs *elem) = 0;
 		virtual void visit(class ASTFunction *elem) = 0;
 		virtual void visit(class ASTWhile *elem) = 0;
+		virtual void visit(class ASTIf *elem) = 0;
 		virtual void visit(class ASTBlock *elem) = 0;
 		virtual void visit(class ASTStmt *elem) = 0;
 		virtual void visit(class ASTDecl *elem) = 0;
@@ -77,7 +80,18 @@ class ASTWhile : public ASTNode {
 		void accept(ASTVisitor *visitor) override {
 			visitor->visit(this);
 		};
+		ASTNode *condition;
 		ASTNode *body;
+};
+
+class ASTIf : public ASTNode {
+	public:
+		void accept(ASTVisitor *visitor) override {
+			visitor->visit(this);
+		};
+		ASTNode *condition = NULL;
+		ASTNode *body = NULL;
+		ASTNode *alternative = NULL;
 };
 
 class ASTBlock : public ASTNode {
@@ -198,6 +212,7 @@ class Parser {
 		ASTNode *ParseMultiply();
 		ASTNode *ParseDivide();
 		ASTNode *ParseEquality();
+		ASTNode *ParseRelational();
 		ASTNode *ParsePrimary();
 };
 

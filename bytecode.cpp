@@ -78,6 +78,12 @@ string ByteCode::GetInstructionAsString(OPCode op) {
 		case OP_JGZ:
 			return "jgz";
 		break;
+		case OP_SETGT:
+			return "setgt";
+		break;
+		case OP_SETLT:
+			return "setlt";
+		break;
 		default:
 			return "nop";
 		break;

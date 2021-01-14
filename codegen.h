@@ -13,15 +13,19 @@ class CodeGen : public ASTVisitor {
 		~CodeGen();
 	private:
 		ByteCode *bytecode;
-		FILE *fp = NULL;
+
+		int labelcounter = 0;
 
 		void GenerateStore(ASTIdentifier *e);
+		void GeneratePushStack();
+		void GeneratePopStack();
 
 		void visit(ASTProgram *e) override;
 		void visit(ASTParams *e) override;
 		void visit(ASTArgs *e) override;
 		void visit(ASTFunction *e) override;
 		void visit(ASTWhile *e) override;
+		void visit(ASTIf *e) override;
 		void visit(ASTBlock *e) override;
 		void visit(ASTStmt *e) override;
 		void visit(ASTDecl *e) override;
@@ -32,7 +36,7 @@ class CodeGen : public ASTVisitor {
 		void visit(ASTIdentifier *e) override;
 		void visit(ASTCall *e) override;
 
-		static string RandomLabel(const int len);
+		string RandomLabel();
 };
 
 #endif

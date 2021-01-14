@@ -118,10 +118,22 @@ ASTNode *Parser::ParseStmt() {
 		ASTWhile *whil = new ASTWhile;
 		this->ExpectToken("while");
 		this->ExpectToken("(");
-		this->ParseExpr();
+		whil->condition = this->ParseExpr();
 		this->ExpectToken(")");
 		whil->body = this->ParseStmt();
 		return whil;
+	} else if(this->PeekToken("if")) {
+		ASTIf *iff = new ASTIf;
+		this->ExpectToken("if");
+		this->ExpectToken("(");
+		iff->condition = this->ParseExpr();
+		this->ExpectToken(")");
+		iff->body = this->ParseStmt();
+		if(this->PeekToken("else")) {
+			this->ExpectToken("else");
+			iff->alternative = this->ParseStmt();
+		}
+		return iff;
 	} else if(this->PeekToken("{")) {
 		ASTBlock *block = new ASTBlock;
 

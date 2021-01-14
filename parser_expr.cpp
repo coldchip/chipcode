@@ -64,11 +64,29 @@ ASTNode *Parser::ParseDivide() {
 }
 
 ASTNode *Parser::ParseEquality() {
-	ASTNode *left = this->ParsePrimary();
+	ASTNode *left = this->ParseRelational();
 	if(this->ConsumeToken("==")) {
 		ASTBinaryExpr *node = new ASTBinaryExpr;
 		node->left = left;
 		node->right = this->ParseEquality();
+		return node;
+	}
+	return left;
+}
+
+ASTNode *Parser::ParseRelational() {
+	ASTNode *left = this->ParsePrimary();
+	if(this->ConsumeToken("<")) {
+		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->oper = OPER_LT;
+		node->left = left;
+		node->right = this->ParseRelational();
+		return node;
+	} else if(this->ConsumeToken(">")) {
+		ASTBinaryExpr *node = new ASTBinaryExpr;
+		node->oper = OPER_GT;
+		node->left = left;
+		node->right = this->ParseRelational();
 		return node;
 	}
 	return left;

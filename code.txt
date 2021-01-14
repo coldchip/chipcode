@@ -1,17 +1,22 @@
-void printf() {
-
+void printf(int32 a, int32 b) {
+	dbgregs();
 }
 
 void main() {
 	int32 a = 0;
 	int32 b = 1;
 	int32 next = 0;
-	while(1) {
+	int32 max = 1000;
+	int32 delaycounter = 0;
+	while(a < max) {
+		while(delaycounter < 99999999) {
+			delaycounter = delaycounter + 3000;
+		}
+		delaycounter = 0;
 		next = a + b;
 		a = b;
 		b = next;
-		dbgregs();
+		printf();
 	}
-	dbgregs();
-	dbgstack();
+	printf();
 }

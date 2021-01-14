@@ -1,3 +1,3 @@
 call dbgregs
 call dbgregs
-call dbgstack
+call printf

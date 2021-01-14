@@ -12,7 +12,7 @@ class VM {
 		VM(vector<Procedure> program);
 		Procedure &GetProcedure(string name);
 		void Run(string name);
-		void ExecProcedure(Procedure &proc);
+		void ExecProcedure(Procedure &proc, char *stack, int *reg, int sp);
 		~VM();
 	private:
 		vector<Procedure> program;
