@@ -35,7 +35,11 @@ ASTNode *Parser::ParseParameters() {
 
 ASTNode *Parser::ParseArgument() {
 	ASTIdentifier *ident = new ASTIdentifier;
+	if(!this->scope->ContainsVar(this->token.value)) {
+		throw string("variable '" + this->token.value + "' not defined");
+	}
 	ident->value = this->token.value;
+	ident->offset = this->scope->GetVarOffset(this->token.value);
 	this->ExpectToken(TT_KEYWORD);
 	return ident;
 }

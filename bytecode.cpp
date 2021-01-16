@@ -24,10 +24,12 @@ Procedure &ByteCode::GetProcedure(string name) {
 	return this->GetProcedure(name);
 }
 
-void ByteCode::Emit(OPCode op, string left, string right) {
+void ByteCode::Emit(OPCode op, VType ltype, string left, VType rtype, string right) {
 	Instruction ins;
 	ins.op = op;
+	ins.ltype = ltype;
 	ins.left = left;
+	ins.rtype = rtype;
 	ins.right = right;
 
 	Procedure &proc = this->GetProcedure(this->currentProcedure);
@@ -84,22 +86,65 @@ string ByteCode::GetInstructionAsString(OPCode op) {
 		case OP_SETLT:
 			return "setlt";
 		break;
+		case OP_SETSP:
+			return "setsp";
+		break;
+		case OP_GETSP:
+			return "getsp";
+		break;
+		case OP_MOVDR:
+			return "movdr";
+		break;
 		default:
 			return "nop";
 		break;
 	}
 }
 
+string ByteCode::GetVTypeAsString(VType type) {
+	switch(type) {
+		case V_REG:
+			return "r";
+		break;
+		case V_ADDR:
+			return "@";
+		break;
+		case V_VALUE:
+			return "#";
+		break;
+		case V_LABEL:
+			return "";
+		break;
+		case V_NONE:
+			return "?";
+		break;
+		default:
+			return "";
+		break;
+	}
+}
+
 void ByteCode::Dump() {
-	cout << "-----BEGIN DUMP-----" << endl;
+	FILE *fp = fopen("test/out.S", "wb");
 	for(Procedure &proc : this->program) {
-		cout << proc.name << ":" << endl;
+		printf("%s\n", proc.name.c_str());
+		fprintf(fp, "%s\n", proc.name.c_str());
+
 		for(Instruction &ins : proc.instructions) {
 			string op = this->GetInstructionAsString(ins.op);
-			cout << "\t" << op << " " << ins.left << " " << ins.right << endl;
+			string ltype = this->GetVTypeAsString(ins.ltype);
+			string rtype = this->GetVTypeAsString(ins.rtype);
+			
+			if(ins.rtype == V_NONE) {
+				printf("\t%s %s%s\n", op.c_str(), ltype.c_str(), ins.left.c_str());
+				fprintf(fp, "\t%s %s%s\n", op.c_str(), ltype.c_str(), ins.left.c_str());
+			} else {
+				printf("\t%s %s%s %s%s\n", op.c_str(), ltype.c_str(), ins.left.c_str(), rtype.c_str(), ins.right.c_str());
+				fprintf(fp, "\t%s %s%s %s%s\n", op.c_str(), ltype.c_str(), ins.left.c_str(), rtype.c_str(), ins.right.c_str());
+			}
 		}
 	}
-	cout << "-----END DUMP-----" << endl;
+	fclose(fp);
 }
 
 vector<Procedure> ByteCode::Build() {

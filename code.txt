@@ -1,4 +1,4 @@
-void printf(int32 a, int32 b) {
+void printf(int32 d) {
 	dbgregs();
 }
 
@@ -16,7 +16,8 @@ void main() {
 		next = a + b;
 		a = b;
 		b = next;
-		printf();
+		dbgregs();
+		printf(max);
 	}
 	printf();
 }
