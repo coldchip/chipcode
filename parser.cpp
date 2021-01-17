@@ -82,11 +82,11 @@ bool Parser::IsCall() {
 bool Parser::IsTypeName() {
 	return 
 	this->PeekToken("void") || 
-	this->PeekToken("int32") || 
+	this->PeekToken("int") || 
 	this->PeekToken("char");
 }
 
-// Parse: int64, string....
+// Parse: int, string....
 
 ASTNode *Parser::ParseBaseType() {
 	//ASTNode *node = new ASTNode;

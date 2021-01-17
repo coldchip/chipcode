@@ -16,11 +16,6 @@ class VM {
 		~VM();
 	private:
 		vector<Procedure> program;
-
-		static bool IsReg(string reg);
-		static int GetRegIndex(string reg);
-		bool IsAddress(string addr);
-		int GetAddressIndex(string reg);
 };
 
 #endif

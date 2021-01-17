@@ -11,7 +11,7 @@ Procedure &VM::GetProcedure(string name) {
 		}
 	}
 
-	throw string("unable to find procedure" + name);
+	throw string("unable to find procedure: " + name);
 }
 
 void VM::Run(string name) {
@@ -232,21 +232,29 @@ void VM::ExecProcedure(Procedure &proc, char *stack, int *reg, int fp, int sp) {
 			break;
 			case OP_SETGT: {
 				// set gt
-				if(cmpgt_flag == true) {
-					if(ltype == V_REG) {
-						int i = stoi(left);
+				if(ltype == V_REG) {
+					int i = stoi(left);
+					if(cmpgt_flag == true) {
 						*(reg + i) = 1;
+					} else {
+						*(reg + i) = 0;
 					}
+				} else {
+					throw string("setlt expects a reg");
 				}
 			}
 			break;
 			case OP_SETLT: {
 				// set lt
-				if(cmplt_flag == true) {
-					if(ltype == V_REG) {
-						int i = stoi(left);
+				if(ltype == V_REG) {
+					int i = stoi(left);
+					if(cmplt_flag == true) {
 						*(reg + i) = 1;
+					} else {
+						*(reg + i) = 0;
 					}
+				} else {
+					throw string("setlt expects a reg");
 				}
 			}
 			break;
@@ -282,37 +290,6 @@ void VM::ExecProcedure(Procedure &proc, char *stack, int *reg, int fp, int sp) {
 			break;
 		}
 	}
-}
-
-bool VM::IsReg(string reg) {
-	return 
-	(reg.compare("r0") == 0) || 
-	(reg.compare("r1") == 0) ||
-	(reg.compare("r2") == 0) || 
-	(reg.compare("r3") == 0) ||
-	(reg.compare("r4") == 0) || 
-	(reg.compare("r5") == 0) || 
-	(reg.compare("r6") == 0);
-}
-
-int VM::GetRegIndex(string reg) {
-	if(reg.compare("r0") == 0) return 0;
-	if(reg.compare("r1") == 0) return 1;
-	if(reg.compare("r2") == 0) return 2;
-	if(reg.compare("r3") == 0) return 3;
-	if(reg.compare("r4") == 0) return 4; 
-	if(reg.compare("r5") == 0) return 5;
-	if(reg.compare("r6") == 0) return 6;
-	throw string(reg + " not found");
-}
-
-bool VM::IsAddress(string addr) {
-	return (addr.rfind("@", 0) == 0);
-}
-
-int VM::GetAddressIndex(string reg) {
-	reg.erase(0, 1);
-	return stoi(reg);
 }
 
 VM::~VM() {

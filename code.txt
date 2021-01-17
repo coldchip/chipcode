@@ -1,23 +1,30 @@
-void printf(int32 d) {
+void printf(int d) {
 	dbgregs();
 }
 
 void main() {
-	int32 a = 0;
-	int32 b = 1;
-	int32 next = 0;
-	int32 max = 1000;
-	int32 delaycounter = 0;
-	while(a < max) {
-		while(delaycounter < 99999999) {
+	domath();
+}
+
+void domath() {
+	int a = 0;
+	int b = 1;
+	int next = 0;
+	int max = 10000;
+	int delaycounter = 0;
+	while(1) {
+		while(delaycounter < 999999999) {
 			delaycounter = delaycounter + 3000;
 		}
 		delaycounter = 0;
 		next = a + b;
 		a = b;
 		b = next;
-		dbgregs();
-		printf(max);
+		if(a > max) {
+			domath();
+		} else {
+			printf(a);
+		}
 	}
 	printf();
 }

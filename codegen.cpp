@@ -147,9 +147,11 @@ void CodeGen::visit(ASTBlock *e) {
 	cout << "ASTBlock" << endl;
 
 	vector<ASTNode*> stmt = e->stmt;
+	this->bytecode->Emit(OP_GETSP, V_REG, "6", V_NONE, "");
 	for(ASTNode *each : stmt) {
 		each->accept(this);
 	}
+	this->bytecode->Emit(OP_SETSP, V_REG, "6", V_NONE, "");
 
 	delete e;
 }
